@@ -61,3 +61,34 @@ app.post('/acc', (req, res) => {
     }
   )
 });
+//gets all music
+app.get('/search', function(req, res){
+  conn.query('select * from music' ,function(error, rows, fields){
+    if(error){
+      console.log(error);
+    }else{
+      console.log(rows);
+      res.send(rows);
+    }
+  });
+});
+
+//adds music
+app.post('/add', (req, res) => {
+
+  const name = req.body.name;
+  const artist = req.body.artist;
+  const genre = req.body.genre;
+  const imageuri = req.body.imageuri; 
+
+  console.log(imageuri);
+  conn.query('INSERT INTO music (name, artist, genre, imageuri) values (?, ?, ?, ?)', 
+  [name, artist, genre, imageuri], (err, result) => {
+      if(err) {
+        console.log(err)
+      } else {
+        res.send("Values Inserted");
+      }
+    }
+  )
+});

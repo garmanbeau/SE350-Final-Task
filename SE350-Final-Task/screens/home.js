@@ -16,6 +16,7 @@ import React, {useState, useEffect} from 'react';
 import { StyleSheet, Text, View, ImageBackground, Image,
      useWindowDimensions, FlatList, TextInput, TouchableOpacity } from 'react-native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import styles from '../shared/styles';
 
@@ -27,6 +28,172 @@ const [genre, setGenre] = useState("");
 const [imageUri, setImageUri] = useState("");
 const [music, setMusic]= useState([]);
 const [temp, setTemp] = useState([]);
+//define cookie use states
+const [rockPresses, setRockPresses] = useState(0);
+const [rapPresses, setRapPresses] = useState(0);
+const [countryPresses, setCountryPresses] = useState(0);
+const [bluesPresses, setBluesPresses] = useState(0);
+const [popPresses, setPopPresses] = useState(0);
+const [RnBPresses, setRnBPresses] = useState(0);
+
+function sendCookies(){
+  axios.post('http://3.134.126.64:3000/cookies', {
+    rock: rockPresses,
+    rap: rapPresses,
+  country: countryPresses, 
+    blues: bluesPresses, 
+    pop: popPresses, 
+    RnB: RnBPresses,
+  })
+  .then(function (response) {
+    console.log(response);
+    alert("Submission successful!");
+    remove();
+  })
+  .catch(function (error) {
+    console.log(error);
+    alert("Submission not sent, please wait a while and try again");
+  });
+}
+
+//save functions
+const saveRock = async() => {
+  try {
+    await AsyncStorage.setItem("rock", JSON.stringify(rockPresses+1));
+  } catch (err) {
+    alert(err);
+  }
+}
+const saveRap = async() => {
+  try {
+    
+    await AsyncStorage.setItem("rap", JSON.stringify(rapPresses+1));
+  } catch (err) {
+    alert(err);
+  }
+}
+const saveCountry = async() => {
+  try {
+    await AsyncStorage.setItem("country", JSON.stringify(countryPresses+1));
+  } catch (err) {
+    alert(err);
+  }
+}
+const saveBlues = async() => {
+  try {
+    await AsyncStorage.setItem("blues", JSON.stringify(bluesPresses+1));
+  } catch (err) {
+    alert(err);
+  }
+}
+const savePop = async() => {
+  try {
+    
+    await AsyncStorage.setItem("pop", JSON.stringify(popPresses+1));
+  } catch (err) {
+    alert(err);
+  }
+}
+const saveRnB = async() => {
+  try {
+    await AsyncStorage.setItem("rnb", JSON.stringify(RnBPresses+1));
+  } catch (err) {
+    alert(err);
+  }
+}
+
+// ---------- load functions ---------- //
+const loadRock = async() => {
+  try {
+    let rockPresses = await AsyncStorage.getItem("rock");
+
+    if (rockPresses !== null) {
+      setRockPresses(JSON.parse(rockPresses));
+    }
+  } catch (err) {
+    alert(err);
+  }
+}
+const loadRap = async() => {
+  try {
+    let rapPresses = await AsyncStorage.getItem("rap");
+
+    if (rapPresses !== null) {
+      
+      setRapPresses(JSON.parse(rapPresses));
+    }
+  } catch (err) {
+    alert(err);
+  }
+}
+const loadCountry = async() => {
+  try {
+    let countryPresses = await AsyncStorage.getItem("country");
+
+    if (countryPresses !== null) {
+      setCountryPresses(JSON.parse(countryPresses));
+    }
+  } catch (err) {
+    alert(err);
+  }
+}
+
+const loadBlues = async() => {
+  try {
+    let bluesPresses = await AsyncStorage.getItem("blues");
+
+    if (bluesPresses !== null) {
+      setBluesPresses(JSON.parse(bluesPresses));
+    }
+  } catch (err) {
+    alert(err);
+  }
+}
+const loadPop = async() => {
+  try {
+    let popPresses = await AsyncStorage.getItem("pop");
+
+    if (popPresses !== null) {
+      
+      setPopPresses(JSON.parse(popPresses));
+    }
+  } catch (err) {
+    alert(err);
+  }
+}
+const loadRnB = async() => {
+  try {
+    let RnBPresses = await AsyncStorage.getItem("rnb");
+
+    if (RnBPresses !== null) {
+      setRnBPresses(JSON.parse(RnBPresses));
+    }
+  } catch (err) {
+    alert(err);
+  }
+}
+
+// ---------- Remove Function ---------- //
+const remove = async () => {
+  try {
+    await AsyncStorage.removeItem("rock");
+    await AsyncStorage.removeItem("rap");
+    await AsyncStorage.removeItem("country");
+    await AsyncStorage.removeItem("blues");
+    await AsyncStorage.removeItem("pop");
+    await AsyncStorage.removeItem("rnb");
+    console.log("removed");
+  } catch (err) {
+    alert(err);
+  } finally {
+    setRockPresses(0);
+    setRapPresses(0);
+    setCountryPresses(0);
+    setBluesPresses(0);
+    setPopPresses(0);
+    setRnBPresses(0);
+  }
+}
 
 //add song function adds a song that the user inputs to the db
 function AddSong(){
@@ -50,10 +217,43 @@ function AddSong(){
     });
 
 };
+//might need to define let Xcount = Xpresses
+function AddCount(name){
+  console.log(name);
+  if (name == "Rock"){
+    setRockPresses(rockPresses+1);
+    saveRock();
+  } else if (name == "Rap"){
+    setRapPresses(rapPresses+1);
+    saveRap();
+  }else if (name == "Country"){
+    setCountryPresses(countryPresses+1);
+    saveCountry();
+  }else if (name == "Blues"){
+    setBluesPresses(bluesPresses+1);
+    saveBlues();
+  }else if (name == "Pop"){
+    setPopPresses(popPresses+1);
+    savePop();
+  }else if (name == "R&B"){
+    setRnBPresses(RnBPresses+1);
+    saveRnB();
+  }else if (name == "load"){
+    console.log(name);
+  }else {
+    console.log("something went wrong");
+    alert("Something went wrong. Please try again. Add Count");
+  }
+}
 //initialize array so don't have to click genre button more than once
 useEffect(() => {
 getMusicByGenre("Rap");
-  
+loadRock();
+loadRap();
+loadCountry();
+loadBlues();
+loadPop();
+loadRnB();
 }, []);
 //defining view that use flatlist
 
@@ -77,6 +277,8 @@ const GridViewShow = ({ name, artist, genre, src}) => (
 //function retrieves music by genre from the db
 function getMusicByGenre(name){
 console.log(name);
+AddCount(name); //counts which genre was clicked
+if (name != "load"){
 axios.get('http://3.134.126.64:3000/search')
       .then((response) => {
         const myObjects = response.data;
@@ -98,7 +300,17 @@ axios.get('http://3.134.126.64:3000/search')
       setMusic(tempArray);
 
       console.log(music);
+    }
 }
+
+function LogAsync(){
+    console.log("rock"+ rockPresses);
+    console.log("rap" + rapPresses);
+    console.log("country" + countryPresses);
+    console.log("blues" + bluesPresses);
+    console.log("pop" + popPresses);
+    console.log("RnB"+ RnBPresses);
+  }
 //the page for the Add section
     const AddScreen = () => (
     <View style={styles.container2}>
@@ -184,19 +396,29 @@ axios.get('http://3.134.126.64:3000/search')
  </ImageBackground>
     );
 
+    const GraphScreen=()=>(
+        <View style={styles.container}>
+          <Text>Graph Goes here</Text>
+          <TouchableOpacity onPress={()=>sendCookies()}>
+          <Text> Send the Data</Text>
+          </TouchableOpacity>
+        </View>
+      );
+
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
     const [routes] = useState([ //creates tabs with Titles and keys
     { key: 'first', title: 'Add' },
     {key: 'second', title: 'Select'},
     {key: 'third', title: 'Show'},
+    {key: 'fourth', title: 'Graph'}
   ]);
   
   const renderScene = SceneMap({ //renders the routes defined above
     first: AddScreen,
     second: SelectScreen,
     third: ShowScreen,
-
+    fourth: GraphScreen,
   });
 
   return (

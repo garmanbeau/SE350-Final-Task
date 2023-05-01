@@ -92,3 +92,23 @@ app.post('/add', (req, res) => {
     }
   )
 });
+
+app.post('/cookies', (req, res) => {
+
+  const rock = req.body.rock;
+  const rap = req.body.rap; 
+  const country = req.body.country; 
+  const blues = req.body.blues; 
+  const pop = req.body.pop; 
+  const RnB = req.body.RnB; 
+
+  conn.query('INSERT INTO cookies  (rock, rap, country, blues, pop, RnB) values (?, ?, ?, ?, ?, ?)', 
+  [rock, rap, country, blues, pop, RnB], (err, result) => {
+      if(err) {
+        console.log(err)
+      } else {
+        res.send("Values Inserted");
+      }
+    }
+  )
+});

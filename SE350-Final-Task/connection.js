@@ -73,6 +73,17 @@ app.get('/search', function(req, res){
   });
 });
 
+app.get('/genredata', function(req, res){
+  conn.query('select SUM(rap) as rap, SUM(rock) as rock, SUM(country) as country, SUM(blues) as blues, SUM(pop) as pop, SUM(RnB) as rnb from cookies',function(error, rows, fields){
+    if(error){
+      console.log(error);
+    }else{
+      console.log(rows);
+      res.send(rows);
+    }
+  });
+});
+
 //adds music
 app.post('/add', (req, res) => {
 

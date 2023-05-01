@@ -1,26 +1,15 @@
 
-
-
-//while right now navigation is not used, it may be used later on. 
-//export default function HomeScreen ({ navigation }){
- //   return (
-  //<View style={styles.container}>
-        
-  //    <Text>Welcome</Text>
-   //  </View>
-   // );
- // }
-
  import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
 import { StyleSheet, Text, View, ImageBackground, Image,
-     useWindowDimensions, FlatList, TextInput, TouchableOpacity } from 'react-native';
+     useWindowDimensions, Dimensions, FlatList, TextInput, TouchableOpacity } from 'react-native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
+import { LineChart } from 'react-native-chart-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import styles from '../shared/styles';
 
-export default function MainScreen() {
+export default function MainScreen({navigation}) {
 //define use states
 const [name, setName] = useState("");
 const [artist, setArtist] = useState("");
@@ -36,6 +25,21 @@ const [bluesPresses, setBluesPresses] = useState(0);
 const [popPresses, setPopPresses] = useState(0);
 const [RnBPresses, setRnBPresses] = useState(0);
 
+const [data, setData] = useState([{
+  rock: 0, 
+  rap: 0,
+  country: 0,
+  blues: 0,
+  pop: 0, 
+  rnb: 0
+},]);
+const [rockCookie, setRockCookie] = useState(0);
+const [rapCookie, setRapCookie] = useState(0);
+const [countryCookie, setCountryCookie] = useState(0);
+const [bluesCookie, setBluesCookie] = useState(0);
+const [popCookie, setPopCookie] = useState(0);
+const [RnBCookie, setRnBCookie] = useState(0);
+
 function sendCookies(){
   axios.post('http://3.134.126.64:3000/cookies', {
     rock: rockPresses,
@@ -46,7 +50,7 @@ function sendCookies(){
     RnB: RnBPresses,
   })
   .then(function (response) {
-    console.log(response);
+   // console.log(response);
     alert("Submission successful!");
     remove();
   })
@@ -54,6 +58,24 @@ function sendCookies(){
     console.log(error);
     alert("Submission not sent, please wait a while and try again");
   });
+}
+function getCookies(){
+    axios.get('http://3.134.126.64:3000/genredata')
+    .then((response) => {
+      const myObjects = response.data;
+        setData(myObjects);
+
+    });
+    // rap rock country blues pop rnb
+    //read the data to the console
+    setRockCookie(data[0].rock);
+    setRapCookie(data[0].rap);
+    setCountryCookie(data[0].country);
+    setBluesCookie(data[0].blues);
+    setPopCookie(data[0].pop);
+    setRnBCookie(data[0].rnb);
+    
+    
 }
 
 //save functions
@@ -204,7 +226,7 @@ function AddSong(){
       imageuri: imageUri, 
     })
     .then(function (response) {
-      console.log(response);
+      //console.log(response);
       setName("");
       setArtist("");
       setGenre("");
@@ -219,7 +241,7 @@ function AddSong(){
 };
 //might need to define let Xcount = Xpresses
 function AddCount(name){
-  console.log(name);
+  //console.log(name);
   if (name == "Rock"){
     setRockPresses(rockPresses+1);
     saveRock();
@@ -248,6 +270,7 @@ function AddCount(name){
 //initialize array so don't have to click genre button more than once
 useEffect(() => {
 getMusicByGenre("Rap");
+getCookies();
 loadRock();
 loadRap();
 loadCountry();
@@ -266,7 +289,7 @@ const GridViewSelect = ({ name}) => (
 
 //view used in the show screen
 const GridViewShow = ({ name, artist, genre, src}) => (
-  <TouchableOpacity style={styles.gridStyle2} onPress={()=>alert("Streaming music is not implemented")}>
+  <TouchableOpacity style={styles.gridStyle2} onPress={()=>MusicNav()}>
   <Text style={styles.gridText}>{name}</Text>
   <Image source={{uri: src}} style={{height:150, width:150}} />
   <Text style={styles.gridText}>{artist}</Text>
@@ -276,7 +299,7 @@ const GridViewShow = ({ name, artist, genre, src}) => (
 
 //function retrieves music by genre from the db
 function getMusicByGenre(name){
-console.log(name);
+//console.log(name);
 AddCount(name); //counts which genre was clicked
 if (name != "load"){
 axios.get('http://3.134.126.64:3000/search')
@@ -285,7 +308,7 @@ axios.get('http://3.134.126.64:3000/search')
         setTemp(myObjects);
       });
       //read the data to the console
-      console.log(temp);
+      //console.log(temp);
       let tempArray =[];
         let j = 0;
       for(let i = 0; i<temp.length; i++){
@@ -295,12 +318,15 @@ axios.get('http://3.134.126.64:3000/search')
             j++;
             console.log(tempArray);
 
-          } else{ console.log("not found");}
+          } //else{ console.log("not found");}
       }
       setMusic(tempArray);
 
-      console.log(music);
+      //console.log(music);
     }
+}
+function MusicNav(){
+  navigation.navigate('Music');
 }
 
 function LogAsync(){
@@ -397,13 +423,64 @@ function LogAsync(){
     );
 
     const GraphScreen=()=>(
-        <View style={styles.container}>
-          <Text>Graph Goes here</Text>
-          <TouchableOpacity onPress={()=>sendCookies()}>
+      <View style={styles.container}> 
+     
+      <View>
+   <Text>Most Popular Music by Genre</Text>
+   <LineChart
+     data={{
+       labels: ["Rock", "Rap", "Country", "Blues", "Pop", "R&B"],
+       datasets: [
+         {
+           data: [
+              0 + rockCookie,
+              0 + rapCookie,
+              0 + countryCookie,
+              0 + bluesCookie,
+              0 + popCookie,
+              0 + RnBCookie, 
+           ]
+         }
+       ]
+     }}
+     width={Dimensions.get("window").width} // from react-native
+     height={220}
+     
+     yAxisInterval={20} // optional, defaults to 1
+     chartConfig={{
+       backgroundColor: "#e26a00",
+       backgroundGradientFrom: "#fb8c00",
+       backgroundGradientTo: "#ffa726",
+       decimalPlaces: 0, // optional, defaults to 2dp
+       color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+       labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+       style: {
+         borderRadius: 16
+       },
+       propsForDots: {
+         r: "6",
+         strokeWidth: "2",
+         stroke: "#ffa726"
+       }
+     }}
+     bezier
+     style={{
+       marginVertical: 8,
+       borderRadius: 16
+     }}
+   />
+ </View>
+
+ <TouchableOpacity onPress={()=>sendCookies()}>
           <Text> Send the Data</Text>
           </TouchableOpacity>
-        </View>
+
+          <TouchableOpacity onPress={()=>getCookies()}>
+          <Text> Get the stats</Text>
+          </TouchableOpacity>
+       </View>
       );
+
 
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
@@ -411,7 +488,7 @@ function LogAsync(){
     { key: 'first', title: 'Add' },
     {key: 'second', title: 'Select'},
     {key: 'third', title: 'Show'},
-    {key: 'fourth', title: 'Graph'}
+    {key: 'fourth', title: 'Stats'}
   ]);
   
   const renderScene = SceneMap({ //renders the routes defined above
